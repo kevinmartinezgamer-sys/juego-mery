@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mary – Opciones</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    width:100%;height:100%;
+    background:linear-gradient(180deg,#0a0518 0%,#1a0a2e 50%,#0a0518 100%);
+    font-family:'Press Start 2P',monospace;
+    overflow:hidden;touch-action:manipulation;
+    user-select:none;-webkit-user-select:none;
+    color:#fff;
+  }
+  #root{
+    width:100vw;height:100vh;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:flex-start;
+    padding:20px 14px;
+    overflow-y:auto;
+  }
+  .title{
+    color:#f4c542;
+    font-size:clamp(16px,4vw,22px);
+    text-align:center;
+    text-shadow:3px 3px 0 #7a3f00;
+    margin-bottom:20px;
+  }
+  .option-group{
+    width:100%;max-width:400px;
+    background:rgba(244,197,66,.05);
+    border:2px solid rgba(244,197,66,.3);
+    border-radius:8px;
+    padding:14px;
+    margin:8px 0;
+  }
+  .option-label{
+    color:#c8a8e0;
+    font-size:8px;
+    margin-bottom:10px;
+    display:block;
+  }
+  .slider-container{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .slider{
+    flex:1;
+    height:8px;
+    -webkit-appearance:none;
+    appearance:none;
+    background:rgba(244,197,66,.2);
+    border-radius:4px;
+    outline:none;
+  }
+  .slider::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    appearance:none;
+    width:20px;
+    height:20px;
+    background:#f4c542;
+    border-radius:50%;
+    cursor:pointer;
+  }
+  .slider::-moz-range-thumb{
+    width:20px;
+    height:20px;
+    background:#f4c542;
+    border-radius:50%;
+    cursor:pointer;
+    border:none;
+  }
+  .value-display{
+    color:#f4c542;
+    font-size:9px;
+    min-width:40px;
+    text-align:right;
+  }
+  .control-btn{
+    background:rgba(244,197,66,.1);
+    border:2px solid rgba(244,197,66,.4);
+    color:#f4c542;
+    padding:10px 14px;
+    font-family:'Press Start 2P',monospace;
+    font-size:7px;
+    cursor:pointer;
+    border-radius:6px;
+    margin:4px;
+    display:inline-block;
+    min-width:80px;
+    text-align:center;
+  }
+  .control-btn:active{
+    background:rgba(244,197,66,.3);
+  }
+  .control-btn.active{
+    background:rgba(244,197,66,.25);
+    border-color:#f4c542;
+  }
+  .back-btn{
+    background:rgba(255,100,100,.1);
+    border:2px solid rgba(255,100,100,.5);
+    color:#ff6464;
+    padding:12px 20px;
+    font-family:'Press Start 2P',monospace;
+    font-size:8px;
+    cursor:pointer;
+    border-radius:8px;
+    margin-top:20px;
+  }
+  .back-btn:active{
+    background:rgba(255,100,100,.3);
+  }
+  .control-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:8px;
+  }
+  .control-item{
+    background:rgba(200,168,224,.08);
+    border:1px solid rgba(200,168,224,.3);
+    border-radius:6px;
+    padding:8px;
+    font-size:6px;
+    color:#c8a8e0;
+  }
+  .control-item .key{
+    color:#f4c542;
+    font-size:8px;
+    display:block;
+    margin-top:4px;
+  }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="title">⚙ OPCIONES</div>
+
+  <!-- SONIDO -->
+  <div class="option-group">
+    <label class="option-label">🔊 VOLUMEN MÚSICA</label>
+    <div class="slider-container">
+      <input type="range" min="0" max="100" value="70" class="slider" id="musicVol">
+      <span class="value-display" id="musicVal">70%</span>
+    </div>
+  </div>
+
+  <div class="option-group">
+    <label class="option-label">🔔 VOLUMEN EFECTOS</label>
+    <div class="slider-container">
+      <input type="range" min="0" max="100" value="80" class="slider" id="sfxVol">
+      <span class="value-display" id="sfxVal">80%</span>
+    </div>
+  </div>
+
+  <!-- CONTROLES -->
+  <div class="option-group">
+    <label class="option-label">🎮 ESQUEMA DE CONTROLES</label>
+    <div>
+      <div class="control-btn" id="scheme1" onclick="setScheme(1)">CLÁSICO</div>
+      <div class="control-btn" id="scheme2" onclick="setScheme(2)">MODERNO</div>
+    </div>
+    <div class="control-grid" style="margin-top:12px;">
+      <div class="control-item">
+        IZQUIERDA<br>
+        <span class="key" id="keyLeft">◀ / A</span>
+      </div>
+      <div class="control-item">
+        DERECHA<br>
+        <span class="key" id="keyRight">▶ / D</span>
+      </div>
+      <div class="control-item">
+        SALTAR<br>
+        <span class="key" id="keyJump">▲ / W / ESPACIO</span>
+      </div>
+      <div class="control-item">
+        DESLIZAR<br>
+        <span class="key" id="keyDown">▼ / S</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAMAÑO BOTONES -->
+  <div class="option-group">
+    <label class="option-label">📱 TAMAÑO BOTONES TÁCTILES</label>
+    <div class="slider-container">
+      <input type="range" min="70" max="130" value="100" class="slider" id="btnSize">
+      <span class="value-display" id="btnSizeVal">100%</span>
+    </div>
+  </div>
+
+  <div class="back-btn" onclick="goBack()">◀ VOLVER</div>
+</div>
+
+<script>
+// Cargar configuración guardada
+const config = {
+  musicVol: parseInt(localStorage.getItem('musicVol') || '70'),
+  sfxVol: parseInt(localStorage.getItem('sfxVol') || '80'),
+  controlScheme: parseInt(localStorage.getItem('controlScheme') || '1'),
+  btnSize: parseInt(localStorage.getItem('btnSize') || '100'),
+};
+
+// Aplicar valores iniciales
+document.getElementById('musicVol').value = config.musicVol;
+document.getElementById('musicVal').textContent = config.musicVol + '%';
+document.getElementById('sfxVol').value = config.sfxVol;
+document.getElementById('sfxVal').textContent = config.sfxVol + '%';
+document.getElementById('btnSize').value = config.btnSize;
+document.getElementById('btnSizeVal').textContent = config.btnSize + '%';
+
+// Marcar esquema activo
+document.getElementById('scheme' + config.controlScheme).classList.add('active');
+
+// Listeners para sliders
+document.getElementById('musicVol').addEventListener('input', e => {
+  const val = e.target.value;
+  document.getElementById('musicVal').textContent = val + '%';
+  localStorage.setItem('musicVol', val);
+});
+
+document.getElementById('sfxVol').addEventListener('input', e => {
+  const val = e.target.value;
+  document.getElementById('sfxVal').textContent = val + '%';
+  localStorage.setItem('sfxVol', val);
+});
+
+document.getElementById('btnSize').addEventListener('input', e => {
+  const val = e.target.value;
+  document.getElementById('btnSizeVal').textContent = val + '%';
+  localStorage.setItem('btnSize', val);
+});
+
+function setScheme(scheme) {
+  document.getElementById('scheme1').classList.remove('active');
+  document.getElementById('scheme2').classList.remove('active');
+  document.getElementById('scheme' + scheme).classList.add('active');
+  localStorage.setItem('controlScheme', scheme);
+  
+  // Actualizar visualización de teclas
+  if(scheme === 1) {
+    document.getElementById('keyLeft').textContent = '◀ / A';
+    document.getElementById('keyRight').textContent = '▶ / D';
+    document.getElementById('keyJump').textContent = '▲ / W / ESPACIO';
+    document.getElementById('keyDown').textContent = '▼ / S';
+  } else {
+    document.getElementById('keyLeft').textContent = 'A / Q';
+    document.getElementById('keyRight').textContent = 'D / E';
+    document.getElementById('keyJump').textContent = 'W / ESPACIO';
+    document.getElementById('keyDown').textContent = 'S / CTRL';
+  }
+}
+
+function goBack() {
+  window.history.back();
+}
+
+// Inicializar visualización de teclas
+setScheme(config.controlScheme);
+</script>
+</body>
+</html>

@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Mary – Nivel 5: La Estación</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{width:100%;height:100%;background:#060408;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;}
+  #root{width:100vw;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;}
+  #cw{position:relative;width:100%;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;}
+  #gc{display:block;image-rendering:pixelated;image-rendering:crisp-edges;border:3px solid #7060a0;box-shadow:0 0 32px rgba(100,70,150,.45);}
+  #hud{width:100%;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:5px 12px;background:#040306;border-top:3px solid #7060a0;font-family:'Press Start 2P',monospace;font-size:8px;color:#7060a0;}
+  #ctrl{width:100%;height:110px;flex-shrink:0;background:#040306;border-top:2px solid #0e0c18;display:flex;align-items:center;justify-content:space-between;padding:0 16px;}
+  .dp{display:grid;grid-template-columns:52px 52px 52px;grid-template-rows:52px 52px;gap:4px;}
+  .bt{background:rgba(100,70,150,.1);border:2px solid rgba(100,70,150,.45);border-radius:8px;color:#9080c0;font-family:'Press Start 2P',monospace;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:none;}
+  .bt.on{background:rgba(100,70,150,.4);border-color:#9080c0;}
+  #bL{grid-column:1;grid-row:1;}#bR{grid-column:3;grid-row:1;}#bD{grid-column:2;grid-row:2;}
+  #bJ{width:90px;height:90px;font-size:26px;border-radius:50%;}
+
+  /* TÍTULO */
+  #ovT{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(4,3,8,.98);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:'Press Start 2P',monospace;z-index:30;}
+  #ovT h1{color:#9080c0;font-size:clamp(14px,3.8vw,22px);text-align:center;line-height:1.8;text-shadow:4px 4px 0 #1a0830;}
+  #ovT .sub{color:#b0a0d0;font-size:clamp(7px,1.9vw,10px);text-align:center;line-height:2.4;max-width:82%;font-style:italic;}
+  #ovT .tag{color:#c8b0f0;font-size:clamp(7px,1.8vw,9px);border:2px solid #c8b0f0;padding:7px 16px;}
+  #ovT .bl{animation:bl .9s infinite;font-size:clamp(7px,1.8vw,9px);color:#ccc;}
+
+  /* DIÁLOGO */
+  #dlg{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:94%;background:#040306;border:2px solid #7060a0;padding:13px 15px 11px;font-family:'Press Start 2P',monospace;font-size:clamp(7px,1.8vw,9px);color:#c8c0e0;line-height:2.0;z-index:20;display:none;box-shadow:0 0 20px rgba(80,60,140,.35);}
+  #dlg .who{color:#9080c0;font-size:7px;margin-bottom:7px;display:block;}
+  #dlg .tap{color:#443;font-size:6px;text-align:right;margin-top:9px;animation:bl 1s infinite;}
+
+  /* ESCENA CORREO — overlay oscuro con el señor */
+  #escena{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(4,3,8,0);display:none;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:8px;z-index:40;transition:background 1.5s;}
+  #escena.show{background:rgba(4,3,8,.92);}
+  #dlgCorreo{width:94%;background:#040306;border:2px solid #7060a0;padding:13px 15px 11px;font-family:'Press Start 2P',monospace;font-size:clamp(7px,1.8vw,9px);color:#c8c0e0;line-height:2.0;box-shadow:0 0 20px rgba(80,60,140,.35);display:none;}
+  #dlgCorreo .who{color:#c0b0e8;font-size:7px;margin-bottom:7px;display:block;}
+  #dlgCorreo .tap{color:#443;font-size:6px;text-align:right;margin-top:9px;animation:bl 1s infinite;}
+
+  /* CARTA */
+  #carta{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(4,3,8,.0);display:none;align-items:center;justify-content:center;z-index:50;transition:background 1.2s;}
+  #carta.show{background:rgba(4,3,8,.97);}
+  #cartaBox{width:90%;max-width:700px;max-height:88%;overflow-y:auto;background:#0a0814;border:2px solid #5040a0;padding:20px 18px;font-family:'Press Start 2P',monospace;font-size:clamp(6px,1.4vw,8px);color:#c0b8d8;line-height:2.3;box-shadow:0 0 50px rgba(80,60,140,.4);opacity:0;transition:opacity 1.2s;scrollbar-width:thin;scrollbar-color:#5040a0 #0a0814;}
+  #cartaBox.show{opacity:1;}
+  #cartaBox::-webkit-scrollbar{width:4px;}
+  #cartaBox::-webkit-scrollbar-thumb{background:#5040a0;}
+  #cartaBox .ctitulo{color:#7060a0;font-size:clamp(7px,1.6vw,9px);display:block;border-bottom:1px solid #2a2040;padding-bottom:10px;margin-bottom:14px;}
+  #cartaBox .ctxt{white-space:pre-wrap;}
+  #cartaBox .cfirma{color:#b0a0d0;display:block;margin-top:16px;text-align:right;font-size:clamp(6px,1.3vw,7px);border-top:1px solid #2a2040;padding-top:10px;}
+  #cartaBox .ctap{color:#555;font-size:6px;text-align:center;margin-top:18px;display:none;animation:bl 1s infinite;}
+
+  /* CRÉDITOS */
+  #creds{position:absolute;top:0;left:0;width:100%;height:100%;background:#040308;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;font-family:'Press Start 2P',monospace;z-index:60;padding:20px;}
+  #creds .cfin{color:#f4c542;font-size:clamp(11px,3vw,18px);text-align:center;line-height:1.8;}
+  #creds .ctxt2{color:#8070a8;font-size:clamp(6px,1.6vw,8px);text-align:center;line-height:2.6;max-width:80%;}
+  #creds .cbl{animation:bl 1.4s infinite;color:#888;font-size:clamp(6px,1.4vw,7px);margin-top:10px;}
+
+  @keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+</style>
+</head>
+<body>
+<div id="root">
+  <div id="cw">
+    <canvas id="gc"></canvas>
+
+    <!-- TÍTULO -->
+    <div id="ovT">
+      <div class="tag">NIVEL 5 — FINAL</div>
+      <h1>LA ESTACIÓN</h1>
+      <div class="sub">"Mary llega cansada.<br>Hay silencio.<br>El señor del correo la mira<br>con tristeza."</div>
+      <div class="bl" id="stBtn">[ TOCA PARA COMENZAR ]</div>
+    </div>
+
+    <!-- DIÁLOGO MARY (durante el juego) -->
+    <div id="dlg">
+      <span class="who">▶ MARY</span>
+      <span id="dtxt"></span>
+      <div class="tap">[ TOCA para continuar ]</div>
+    </div>
+
+    <!-- ESCENA LLEGADA — señor del correo -->
+    <div id="escena">
+      <div id="dlgCorreo">
+        <span class="who" id="correoWho">▶ ???</span>
+        <span id="correoTxt"></span>
+        <div class="tap">[ TOCA para continuar ]</div>
+      </div>
+    </div>
+
+    <!-- CARTA -->
+    <div id="carta">
+      <div id="cartaBox">
+        <span class="ctitulo">[ El papel amarillo cruje entre sus manos. ]</span>
+        <span class="ctxt" id="ctxt"></span>
+        <span class="cfirma" id="cfirma"></span>
+        <div class="ctap" id="ctap">[ TOCA para continuar ]</div>
+      </div>
+    </div>
+
+    <!-- CRÉDITOS -->
+    <div id="creds">
+      <div class="cfin" id="credsTxt"></div>
+      <div class="ctxt2" id="credsNarr"></div>
+      <div class="cbl">✦ FIN ✦</div>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <span>NVL <span style="color:#fff">5</span></span>
+    <span style="color:#c0b0e8">MARY</span>
+    <span>🪙 <span id="hC" style="color:#fff">0</span></span>
+    <span>❤ <span id="hL" style="color:#fff">3</span></span>
+  </div>
+
+  <!-- CONTROLES -->
+  <div id="ctrl">
+    <div class="dp">
+      <div class="bt" id="bL">◀</div><div></div>
+      <div class="bt" id="bR">▶</div>
+      <div></div><div class="bt" id="bD">▼</div><div></div>
+    </div>
+    <div><div class="bt" id="bJ">▲</div></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   CANVAS
+══════════════════════════════════════ */
+const cv=document.getElementById('gc'),ctx=cv.getContext('2d');
+const NW=800,NH=420;
+function resize(){
+  const w=document.getElementById('cw');
+  const s=Math.min(w.clientWidth/NW,w.clientHeight/NH);
+  cv.width=NW;cv.height=NH;
+  cv.style.width=Math.floor(NW*s)+'px';
+  cv.style.height=Math.floor(NH*s)+'px';
+}
+resize();window.addEventListener('resize',resize);
+
+/* ══════════════════════════════════════
+   INPUT
+══════════════════════════════════════ */
+const IN={L:false,R:false,J:false,D:false};
+const KY={};
+document.addEventListener('keydown',e=>{
+  KY[e.code]=true;
+  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+  sk();
+});
+document.addEventListener('keyup',e=>{KY[e.code]=false;sk();});
+function sk(){
+  IN.L=!!(KY['ArrowLeft']||KY['KeyA']);
+  IN.R=!!(KY['ArrowRight']||KY['KeyD']);
+  IN.J=!!(KY['ArrowUp']||KY['Space']||KY['KeyW']);
+  IN.D=!!(KY['ArrowDown']||KY['KeyS']);
+}
+function bb(id,p){
+  const el=document.getElementById(id);
+  const on=()=>{IN[p]=true;el.classList.add('on');};
+  const off=()=>{IN[p]=false;el.classList.remove('on');};
+  el.addEventListener('touchstart',e=>{e.preventDefault();on();},{passive:false});
+  el.addEventListener('touchend',e=>{e.preventDefault();off();},{passive:false});
+  el.addEventListener('touchcancel',e=>{e.preventDefault();off();},{passive:false});
+  el.addEventListener('mousedown',on);el.addEventListener('mouseup',off);el.addEventListener('mouseleave',off);
+}
+bb('bL','L');bb('bR','R');bb('bJ','J');bb('bD','D');
+
+/* ══════════════════════════════════════
+   CONSTANTES
+══════════════════════════════════════ */
+const GR=0.52, JF=-12.5, SPD=2.8, WW=2400;
+const GY=365, GH=55, CH=26;
+
+/* ══════════════════════════════════════
+   DISEÑO MUNDO — completamente diferente
+   • Suelo CONTINUO — sin huecos mortales
+   • Solo 3 saltos opcionales sobre cajas
+   • Camino lineal hacia la estación
+   • La estación se ve desde el inicio al fondo
+   • Pocos enemigos, zona final libre
+   • El foco es llegar, no sobrevivir
+══════════════════════════════════════ */
+function buildWorld(){
+  const pl=[], cn=[], en=[];
+
+  // ── SUELO COMPLETAMENTE CONTINUO ───────
+  // Sin huecos — este nivel es narrativo
+  pl.push({x:0,y:GY,w:WW+100,h:GH,t:'g'});
+
+  // ── CAJAS DE MADERA (obstáculos saltables, no huecos) ──
+  // El jugador puede saltarlas o rodearlas
+  [
+    // Zona 1 — primeras cajas bajas
+    {x:280,y:GY-28,w:28,h:28},{x:360,y:GY-28,w:28,h:28},
+    // Zona 2 — cajas apiladas
+    {x:620,y:GY-28,w:28,h:28},{x:648,y:GY-28,w:28,h:28},{x:634,y:GY-56,w:28,h:28},
+    // Zona 3
+    {x:960,y:GY-28,w:28,h:28},{x:988,y:GY-28,w:28,h:28},{x:1016,y:GY-28,w:28,h:28},
+    // Zona 4
+    {x:1300,y:GY-28,w:28,h:28},{x:1328,y:GY-28,w:28,h:28},{x:1314,y:GY-56,w:28,h:28},
+    // Zona 5 — cerca de la estación, más fácil
+    {x:1620,y:GY-28,w:28,h:28},{x:1648,y:GY-28,w:28,h:28},
+    // Zona 6 — entrada estación despejada
+    {x:1900,y:GY-28,w:28,h:28},
+  ].forEach(b=>pl.push({...b,t:'b'}));
+
+  // ── BANCOS (decorativos, colisionables) ──
+  [{x:160,y:GY-18,w:50,h:18},{x:480,y:GY-18,w:50,h:18},
+   {x:800,y:GY-18,w:50,h:18},{x:1140,y:GY-18,w:50,h:18},
+   {x:1460,y:GY-18,w:50,h:18},
+  ].forEach(b=>pl.push({...b,t:'bench'}));
+
+  // ── ENEMIGOS — solo en zonas 1-3, escasos y lentos ──
+  // Menos que cualquier otro nivel — el camino no es fácil pero tampoco es guerra
+  [
+    {x:200,  mn:40,   mx:270,  sp:.6},
+    {x:420,  mn:330,  mx:560,  sp:.65},
+    {x:720,  mn:630,  mx:890,  sp:.6},
+    {x:1060, mn:1000, mx:1250, sp:.65},
+    {x:1380, mn:1330, mx:1570, sp:.6},
+    {x:1700, mn:1650, mx:1850, sp:.55},
+  ].forEach(e=>en.push({x:e.x,y:GY-26,w:22,h:26,mn:e.mn,mx:e.mx,sp:e.sp,dr:1,an:0,at:0}));
+
+  // ── MONEDAS — solo 8, muy pocas, como recuerdo ──
+  [{x:120,y:GY-CH},{x:340,y:GY-CH},{x:560,y:GY-CH},
+   {x:780,y:GY-CH},{x:1020,y:GY-CH},{x:1260,y:GY-CH},
+   {x:1480,y:GY-CH},{x:1720,y:GY-CH},
+  ].forEach((c,i)=>cn.push({...c,col:false,an:i*.9}));
+
+  // Meta — la estación empieza en x=2050
+  return{pl,cn,en,goal:2050};
+}
+const W=buildWorld();
+const aP=()=>W.pl;
+
+/* ══════════════════════════════════════
+   LLUVIA SUAVE
+══════════════════════════════════════ */
+const RD=[];
+for(let i=0;i<60;i++) RD.push({x:Math.random()*NW,y:Math.random()*NH,l:5+Math.random()*7,s:5+Math.random()*4});
+function tickRain(){
+  RD.forEach(r=>{r.y+=r.s;r.x-=.8;if(r.y>NH+r.l){r.y=-r.l;r.x=Math.random()*NW;}if(r.x<-5)r.x=NW+5;});
+}
+
+/* ══════════════════════════════════════
+   TREN (visible al fondo desde el inicio)
+══════════════════════════════════════ */
+let trainX=WW+200; // empieza fuera a la derecha
+let trainEntered=false;
+function tickTrain(){
+  if(trainEntered){trainX-=.6;} // el tren llega lentamente
+}
+function startTrain(){if(!trainEntered){trainEntered=true;}}
+
+/* ══════════════════════════════════════
+   JUGADOR
+══════════════════════════════════════ */
+const P={x:40,y:GY-30,vx:0,vy:0,w:18,h:26,og:false,dr:1,af:0,at:0,dead:false,rt:0,inv:0,jl:false};
+let lives=3,coinsN=0,won=false,camX=0,gs='title';
+
+/* ══════════════════════════════════════
+   PARTÍCULAS
+══════════════════════════════════════ */
+const PA=[];
+function spP(x,y,col,n=5){
+  for(let i=0;i<n;i++) PA.push({x,y,vx:(Math.random()-.5)*2.5,vy:(Math.random()-.5)*2.5-1,col,sz:2+Math.random()*3,lf:22,mx:22});
+}
+function tickP(){for(let i=PA.length-1;i>=0;i--){const p=PA[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.18;p.lf--;if(p.lf<=0)PA.splice(i,1);}}
+
+/* ══════════════════════════════════════
+   DIÁLOGOS MARY (durante camino)
+══════════════════════════════════════ */
+const DL=[
+  {t:'"El aire huele distinto aquí.\nComo antes.\nComo cuando papá me tomaba de la mano."',cam:0,sh:false},
+  {t:'"Cada paso se siente más pesado.\nNo sé si quiero que sea lo que pienso.\nNo sé si quiero llegar."',cam:600,sh:false},
+  {t:'"Pero mis piernas siguen.\nComo siempre.\nComo él me enseñó."',cam:1200,sh:false},
+  {t:'"Ya lo veo.\nLa estación.\nEl señor del correo está en la puerta."',cam:1700,sh:false},
+];
+let dlgT='',dlgC=0,dlgTm=0,dlgJL=false;
+function chkD(){DL.forEach(d=>{if(!d.sh&&camX>=d.cam){d.sh=true;opD(d.t);}});}
+function opD(t){gs='dialog';dlgT=t;dlgC=0;dlgTm=0;document.getElementById('dlg').style.display='block';document.getElementById('dtxt').textContent='';}
+function advD(){
+  if(dlgC<dlgT.length){dlgC=dlgT.length;document.getElementById('dtxt').textContent=dlgT;}
+  else{gs='playing';document.getElementById('dlg').style.display='none';}
+}
+function tkD(){
+  dlgTm++;
+  if(dlgTm%2===0&&dlgC<dlgT.length){dlgC++;document.getElementById('dtxt').textContent=dlgT.slice(0,dlgC);}
+  if(IN.J&&!dlgJL){dlgJL=true;advD();}if(!IN.J)dlgJL=false;
+}
+
+/* ══════════════════════════════════════
+   SECUENCIA FINAL — Señor del Correo
+══════════════════════════════════════ */
+const CORREO_DLG=[
+  {who:'▶ SR. DEL CORREO', t:'…'},
+  {who:'▶ SR. DEL CORREO', t:'¿Mary?\n¿La hija del Sr. Enrique?'},
+  {who:'▶ MARY', t:'Sí.\nVine a buscar la carta.'},
+  {who:'▶ SR. DEL CORREO', t:'Llegó hace mucho tiempo.\nNo sabíamos cómo encontrarte.\n…Lo siento, pequeña.'},
+  {who:'▶ MARY', t:'Dénela.\nPor favor.'},
+  {who:'▶ SR. DEL CORREO', t:'[ Te entrega el sobre con manos temblorosas. ]'},
+];
+let correoIdx=0,correoChar=0,correoTm=0,correoJL=false,correoFull=false;
+
+function startEscena(){
+  gs='escena';
+  startTrain();
+  const el=document.getElementById('escena');
+  el.style.display='flex';
+  setTimeout(()=>{el.classList.add('show');},80);
+  setTimeout(()=>{
+    document.getElementById('dlgCorreo').style.display='block';
+    typeCorreo();
+  },1200);
+}
+
+function typeCorreo(){
+  const d=CORREO_DLG[correoIdx];
+  document.getElementById('correoWho').textContent=d.who;
+  document.getElementById('correoTxt').textContent='';
+  correoChar=0;correoTm=0;correoFull=false;
+  const iv=setInterval(()=>{
+    if(correoChar<=d.t.length){
+      document.getElementById('correoTxt').textContent=d.t.slice(0,correoChar);
+      correoChar++;
+    }else{correoFull=true;clearInterval(iv);}
+  },30);
+}
+
+document.getElementById('escena').addEventListener('click',()=>{
+  if(!correoFull)return;
+  correoIdx++;
+  if(correoIdx>=CORREO_DLG.length){
+    document.getElementById('escena').style.display='none';
+    showCarta();
+  } else {
+    correoFull=false;
+    typeCorreo();
+  }
+});
+
+/* ══════════════════════════════════════
+   CARTA DEL PADRE
+══════════════════════════════════════ */
+const CARTA=`Querida Mary,
+
+Esta guerra ha terminado para mí.
+No siento remordimiento.
+He visto demasiado error.
+
+Espero que el destino haya sido
+más piadoso contigo,
+pequeña Mary.
+
+Nuestro tiempo en la tierra es breve
+y el mío ha estado colmado de tanta alegría
+que solo siento agradecimiento
+por tales bendiciones.
+
+En especial por lo maravillosa
+que hiciste mi vida.
+
+Esta será mi última carta.
+Vivo mis últimas horas
+y solo un milagro puede salvarme.
+
+Un tribunal militar me ha declarado
+culpable por la muerte de un hombre.
+No era mi intención matarlo.
+La guerra enloquece a los hombres.
+
+Luché por mi país y por mi libertad.
+Mi honor es cierto
+y mis acciones no deberían deshonrarte.
+
+Al dejar este mundo,
+solo me arrepiento de una cosa:
+
+Incumplí mi promesa
+de traerte a casa.
+
+Espero que encuentres el modo
+de perdonarme,
+puesto que es voluntad de Dios
+separarnos en la tierra.
+
+Espero que volvamos a vernos
+en el cielo.
+
+Recuérdame en tus plegarias.`;
+
+const FIRMA=`Tu padre, que te quiere\ncon todo el corazón.`;
+
+let cartaFull=false;
+function showCarta(){
+  gs='carta';
+  const el=document.getElementById('carta');
+  el.style.display='flex';
+  setTimeout(()=>el.classList.add('show'),60);
+  setTimeout(()=>{
+    const box=document.getElementById('cartaBox');
+    box.classList.add('show');
+    let i=0;
+    const iv=setInterval(()=>{
+      document.getElementById('ctxt').textContent=CARTA.slice(0,i);
+      box.scrollTop=box.scrollHeight;
+      if(i>=CARTA.length){
+        clearInterval(iv);
+        setTimeout(()=>{
+          document.getElementById('cfirma').textContent=FIRMA;
+          cartaFull=true;
+          document.getElementById('ctap').style.display='block';
+        },600);
+      }
+      i+=2;
+    },18);
+  },1100);
+}
+document.getElementById('carta').addEventListener('click',()=>{
+  if(!cartaFull)return;
+  document.getElementById('carta').style.display='none';
+  showCredits();
+});
+document.getElementById('ctap').addEventListener('click',e=>{
+  e.stopPropagation();
+  if(cartaFull){document.getElementById('carta').style.display='none';showCredits();}
+});
+
+/* ══════════════════════════════════════
+   CRÉDITOS FINALES
+══════════════════════════════════════ */
+const NARR=`Mary dobló la carta con cuidado.\nLa guardó sobre su corazón.\n\nAfuera la lluvia seguía.\nEl tren silbó a lo lejos.\n\nY ella, por primera vez en mucho tiempo,\nno corrió.\n\nSolo se quedó quieta.\nY dejó que el dolor\nfuera también gratitud.`;
+
+function showCredits(){
+  gs='credits';
+  const el=document.getElementById('creds');
+  el.style.display='flex';
+  let i=0;
+  document.getElementById('credsTxt').textContent='MARY';
+  const n=document.getElementById('credsNarr');
+  const iv=setInterval(()=>{
+    n.textContent=NARR.slice(0,i);
+    if(i>=NARR.length)clearInterval(iv);
+    i+=2;
+  },25);
+}
+
+/* ══════════════════════════════════════
+   COLISIONES
+══════════════════════════════════════ */
+function ov(ax,ay,aw,ah,bx,by,bw,bh){return ax<bx+bw&&ax+aw>bx&&ay<by+bh&&ay+ah>by;}
+function resCol(){
+  P.og=false;
+  for(const pl of aP()){
+    if(!ov(P.x,P.y,P.w,P.h,pl.x,pl.y,pl.w,pl.h))continue;
+    const oL=P.x+P.w-pl.x,oR=pl.x+pl.w-P.x,oT=P.y+P.h-pl.y,oB=pl.y+pl.h-P.y;
+    if(Math.min(oT,oB)<Math.min(oL,oR)){
+      if(oT<oB){P.y=pl.y-P.h;P.vy=0;P.og=true;}
+      else{P.y=pl.y+pl.h;P.vy=Math.max(P.vy,1);}
+    }else{
+      if(oL<oR){P.x=pl.x-P.w;P.vx=0;}else{P.x=pl.x+P.w;P.vx=0;}
+    }
+  }
+}
+
+/* ══════════════════════════════════════
+   ENEMIGOS
+══════════════════════════════════════ */
+function tkEn(){
+  W.en.forEach(e=>{
+    e.x+=e.sp*e.dr;
+    if(e.x<=e.mn){e.x=e.mn;e.dr=1;}
+    if(e.x+e.w>=e.mx){e.x=e.mx-e.w;e.dr=-1;}
+    if(++e.at>12){e.at=0;e.an=(e.an+1)%4;}
+    if(!P.dead&&P.inv===0&&ov(P.x,P.y,P.w,P.h,e.x,e.y,e.w,e.h))die();
+  });
+}
+
+/* ══════════════════════════════════════
+   MUERTE / RESPAWN
+══════════════════════════════════════ */
+function die(){
+  if(P.dead||P.inv>0)return;
+  P.dead=true;P.rt=80;P.vx=0;P.vy=0;
+  lives=Math.max(0,lives-1);
+  spP(P.x+9,P.y+13,'#9070c0',10);updH();
+}
+function respawn(){
+  P.x=40;P.y=GY-P.h-4;P.vx=0;P.vy=0;P.dead=false;P.jl=false;P.inv=180;
+  if(lives<=0){lives=3;coinsN=0;camX=0;updH();}
+}
+function updH(){
+  document.getElementById('hC').textContent=coinsN;
+  document.getElementById('hL').textContent='❤'.repeat(lives);
+}
+
+/* ══════════════════════════════════════
+   ACTUALIZAR JUGADOR
+══════════════════════════════════════ */
+function update(){
+  if(P.dead){if(--P.rt<=0)respawn();return;}
+  if(P.inv>0)P.inv--;
+  if(IN.L){P.vx=-SPD;P.dr=-1;}
+  else if(IN.R){P.vx=SPD;P.dr=1;}
+  else P.vx*=.76;
+  if(IN.J&&!P.jl&&P.og){P.vy=JF;P.jl=true;spP(P.x+9,P.y+P.h,'#9070c0',4);}
+  if(!IN.J)P.jl=false;
+  P.vy=Math.min(P.vy+GR,16);P.x+=P.vx;P.y+=P.vy;
+  resCol();
+  P.x=Math.max(0,Math.min(P.x,WW-P.w));
+  if(P.y>NH+30&&P.inv===0)die();
+  W.cn.forEach(c=>{
+    if(!c.col&&ov(P.x,P.y,P.w,P.h,c.x-10,c.y-10,20,20)){
+      c.col=true;coinsN++;spP(c.x,c.y,'#f4c542',4);updH();
+    }
+  });
+  // Llegar a la estación
+  if(!won&&P.x>W.goal){
+    won=true;gs='escena_wait';
+    P.vx=0;
+    setTimeout(startEscena,1600);
+  }
+  if(Math.abs(P.vx)>.2){if(++P.at>8){P.at=0;P.af++;}}
+  camX=Math.max(0,Math.min(P.x-280,WW-NW));
+  if(gs==='playing')chkD();
+}
+
+/* ══════════════════════════════════════
+   DIBUJO
+══════════════════════════════════════ */
+function sx(x){return Math.round(x-camX);}
+
+function dSky(){
+  const g=ctx.createLinearGradient(0,0,0,NH);
+  g.addColorStop(0,'#060408');g.addColorStop(.55,'#0a080e');g.addColorStop(1,'#0e0c18');
+  ctx.fillStyle=g;ctx.fillRect(0,0,NW,NH);
+  // Luna
+  const mx=(650-camX*.04+NW*4)%NW;
+  ctx.fillStyle='rgba(160,140,200,.12)';ctx.beginPath();ctx.arc(mx,52,36,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#d0c8e8';ctx.beginPath();ctx.arc(mx,52,22,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(6,4,8,.5)';ctx.beginPath();ctx.arc(mx-7,48,16,0,Math.PI*2);ctx.fill();
+  // Estrellas
+  [[60,20],[180,12],[310,28],[450,8],[590,22],[730,14],[790,6]].forEach(([x,y])=>{
+    ctx.fillStyle='rgba(190,180,220,.65)';ctx.fillRect(((x-camX*.05)+NW*4)%NW,y,2,2);
+  });
+}
+
+function dBgCity(){
+  // Ciudad al fondo, muy oscura — el nivel es íntimo
+  for(let i=0;i<16;i++){
+    const bx=((i*185-camX*.09)+WW*2)%(NW+185)-55;
+    const bh=70+(i*39)%110,bw=60+(i*17)%45;
+    ctx.fillStyle='#070510';ctx.fillRect(bx,GY-bh,bw,bh);
+    // Ventanas — solo algunas encendidas (ciudad dormida)
+    for(let r=0;r<Math.floor(bh/30);r++) for(let c=0;c<Math.floor(bw/22);c++){
+      const lit=(r*5+c*3+i)%12;
+      ctx.fillStyle=lit===0?'rgba(170,150,100,.5)':lit===1?'rgba(80,60,130,.4)':'#060410';
+      ctx.fillRect(bx+3+c*21,GY-bh+5+r*29,12,16);
+    }
+  }
+}
+
+/* ══════════════════════════════════════
+   LA ESTACIÓN — edificio completo
+══════════════════════════════════════ */
+function dStation(){
+  const ox=sx(W.goal-100);
+  // Sombra/halo de luz de la estación
+  const sg=ctx.createRadialGradient(ox+260,GY-80,10,ox+260,GY-80,220);
+  sg.addColorStop(0,'rgba(140,110,180,.15)');sg.addColorStop(1,'rgba(140,110,180,0)');
+  ctx.fillStyle=sg;ctx.fillRect(ox,GY-240,520,250);
+
+  // Estructura principal
+  ctx.fillStyle='#12101e';ctx.fillRect(ox,GY-200,480,200);
+  // Techo
+  ctx.fillStyle='#1a1830';ctx.fillRect(ox-20,GY-210,520,16);
+  ctx.fillStyle='#221e3c';ctx.fillRect(ox-20,GY-210,520,6);
+  // Techo triangular central
+  ctx.fillStyle='#14122a';
+  ctx.beginPath();ctx.moveTo(ox+140,GY-210);ctx.lineTo(ox+240,GY-258);ctx.lineTo(ox+340,GY-210);ctx.fill();
+  ctx.fillStyle='#1e1c38';
+  ctx.beginPath();ctx.moveTo(ox+140,GY-210);ctx.lineTo(ox+240,GY-258);ctx.lineTo(ox+340,GY-210);
+  ctx.lineWidth=2;ctx.strokeStyle='#2a2650';ctx.stroke();
+
+  // RELOJ grande en el triángulo
+  ctx.fillStyle='#0e0c1c';ctx.beginPath();ctx.arc(ox+240,GY-228,20,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#7060a0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(ox+240,GY-228,20,0,Math.PI*2);ctx.stroke();
+  const t=Date.now()/1000;
+  ctx.strokeStyle='#c0b0e8';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(ox+240,GY-228);
+  ctx.lineTo(ox+240+Math.sin(t*.15)*14,GY-228-Math.cos(t*.15)*14);ctx.stroke();
+  ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(ox+240,GY-228);
+  ctx.lineTo(ox+240+Math.sin(t*1.5)*10,GY-228-Math.cos(t*1.5)*10);ctx.stroke();
+  ctx.fillStyle='#9080c0';ctx.beginPath();ctx.arc(ox+240,GY-228,2.5,0,Math.PI*2);ctx.fill();
+
+  // Columnas
+  for(let c=0;c<6;c++){
+    ctx.fillStyle='#1a1830';ctx.fillRect(ox+c*88,GY-198,14,198);
+    ctx.fillStyle='#24203e';ctx.fillRect(ox+c*88,GY-198,4,198);
+  }
+
+  // Cartel ESTACIÓN
+  ctx.fillStyle='#0a081a';ctx.fillRect(ox+80,GY-178,320,30);
+  ctx.fillStyle='#9080c0';ctx.font='bold 9px "Press Start 2P"';
+  ctx.fillText('E S T A C I Ó N',ox+96,GY-158);
+
+  // Ventanas con luz cálida (más que en niveles anteriores — la estación está viva)
+  [[ox+30,GY-155,50,40],[ox+100,GY-155,50,40],[ox+310,GY-155,50,40],[ox+380,GY-155,50,40],
+   [ox+30,GY-100,50,40],[ox+100,GY-100,50,40],[ox+310,GY-100,50,40],[ox+380,GY-100,50,40],
+   [ox+190,GY-130,80,60],
+  ].forEach(([wx,wy,ww,wh])=>{
+    ctx.fillStyle='rgba(180,160,100,.18)';ctx.fillRect(wx,wy,ww,wh);
+    ctx.fillStyle='rgba(180,160,100,.1)';ctx.fillRect(wx+2,wy+2,ww-4,wh-4);
+    ctx.strokeStyle='#302850';ctx.lineWidth=1.5;ctx.strokeRect(wx,wy,ww,wh);
+  });
+
+  // Puertas de entrada (abiertas)
+  ctx.fillStyle='#0e0c1c';ctx.fillRect(ox+200,GY-90,80,90);
+  ctx.fillStyle='rgba(150,130,90,.1)';ctx.fillRect(ox+200,GY-90,80,90);
+  ctx.strokeStyle='#302850';ctx.lineWidth=2;
+  ctx.strokeRect(ox+200,GY-90,38,90);ctx.strokeRect(ox+242,GY-90,38,90);
+
+  // Andén
+  ctx.fillStyle='#14122a';ctx.fillRect(ox-20,GY-10,520,10);
+  ctx.fillStyle='#1e1c38';ctx.fillRect(ox-20,GY-10,520,3);
+
+  // SEÑOR DEL CORREO en la puerta
+  dCartero(ox+220,GY-26);
+
+  // Letrero de VÍA
+  ctx.fillStyle='#0c0a1c';ctx.fillRect(ox+380,GY-60,90,22);
+  ctx.fillStyle='#7060a0';ctx.font='6px "Press Start 2P"';
+  ctx.fillText('VÍA 1',ox+394,GY-45);
+}
+
+function dCartero(cx,cy){
+  // Señor del correo — expresión triste, carta en mano
+  // Gorra
+  ctx.fillStyle='#1c1c2e';ctx.fillRect(cx-1,cy-4,20,5);
+  ctx.fillRect(cx+1,cy-6,16,4);
+  // Cara
+  ctx.fillStyle='#c0a888';ctx.fillRect(cx+2,cy-1,14,9);
+  // Ojos tristes (mirando abajo)
+  ctx.fillStyle='#604848';ctx.fillRect(cx+4,cy+2,3,2);ctx.fillRect(cx+11,cy+2,3,2);
+  // Boca en curva hacia abajo
+  ctx.fillStyle='#806050';ctx.fillRect(cx+5,cy+6,8,1);
+  ctx.fillRect(cx+4,cy+5,2,2);ctx.fillRect(cx+12,cy+5,2,2);
+  // Cuerpo — uniforme gris oscuro
+  ctx.fillStyle='#1e1e30';ctx.fillRect(cx,cy+8,18,15);
+  ctx.fillStyle='#28283e';ctx.fillRect(cx,cy+8,18,5);
+  // Brazos
+  ctx.fillStyle='#1a1a28';ctx.fillRect(cx-2,cy+9,3,10);ctx.fillRect(cx+17,cy+9,3,10);
+  // CARTA en ambas manos (ofreciéndola)
+  ctx.fillStyle='#c8b060';ctx.fillRect(cx-2,cy+17,22,12);
+  ctx.fillStyle='#a89040';ctx.fillRect(cx-2,cy+17,22,2);
+  ctx.fillStyle='#b0a050';
+  // Doblez carta
+  ctx.beginPath();ctx.moveTo(cx-2,cy+17);ctx.lineTo(cx+9,cy+22);ctx.lineTo(cx+20,cy+17);ctx.stroke();
+  // Piernas
+  ctx.fillStyle='#141424';ctx.fillRect(cx+2,cy+23,5,7);ctx.fillRect(cx+11,cy+23,5,7);
+  ctx.fillStyle='#0c0c18';ctx.fillRect(cx+1,cy+28,7,3);ctx.fillRect(cx+10,cy+28,7,3);
+
+  // Globo de texto si Mary está cerca
+  if(!won&&Math.abs(P.x-(cx+camX))<200){
+    const bx=sx(cx+camX)-60;
+    ctx.fillStyle='rgba(14,12,24,.85)';ctx.fillRect(bx,cy-30,110,20);
+    ctx.strokeStyle='#7060a0';ctx.lineWidth=1;ctx.strokeRect(bx,cy-30,110,20);
+    ctx.fillStyle='#9080c0';ctx.font='5px "Press Start 2P"';
+    ctx.fillText('Aquí está, señorita.',bx+4,cy-17);
+  }
+}
+
+/* ══════════════════════════════════════
+   TREN
+══════════════════════════════════════ */
+function dTrain(){
+  const tx=sx(trainX);
+  if(tx>NW+20||tx+300<-10)return;
+  const ty=GY-44;
+  // Rieles
+  ctx.fillStyle='#141222';ctx.fillRect(sx(W.goal-80),GY-4,NW+200,8);
+  ctx.fillStyle='#1a1830';ctx.fillRect(sx(W.goal-80),GY-4,NW+200,3);
+  // Cuerpo del tren
+  ctx.fillStyle='#181628';ctx.fillRect(tx,ty,260,42);
+  ctx.fillStyle='#201e36';ctx.fillRect(tx,ty,260,10);
+  ctx.fillStyle='#141224';ctx.fillRect(tx,ty+10,260,32);
+  // Ventanas del tren
+  for(let i=0;i<7;i++){
+    ctx.fillStyle='rgba(150,135,90,.25)';ctx.fillRect(tx+16+i*34,ty+3,24,14);
+    ctx.strokeStyle='#2a2848';ctx.lineWidth=1;ctx.strokeRect(tx+16+i*34,ty+3,24,14);
+  }
+  // Cabina
+  ctx.fillStyle='#0e0c1e';ctx.fillRect(tx+240,ty-8,22,50);
+  ctx.fillStyle='rgba(150,130,80,.3)';ctx.fillRect(tx+244,ty-4,14,20);
+  // Ruedas
+  for(let i=0;i<4;i++){
+    ctx.fillStyle='#101020';ctx.beginPath();ctx.arc(tx+30+i*66,ty+42,10,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#282040';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(tx+30+i*66,ty+42,10,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#1a1830';ctx.beginPath();ctx.arc(tx+30+i*66,ty+42,5,0,Math.PI*2);ctx.fill();
+  }
+  // Vapor de la locomotora
+  const steamT=Date.now()/400;
+  for(let i=0;i<3;i++){
+    const sa=((steamT+i*.8)%1);
+    ctx.fillStyle=`rgba(180,170,200,${.18-sa*.18})`;
+    ctx.beginPath();ctx.arc(tx+258,ty-8-sa*25,5+sa*12,0,Math.PI*2);ctx.fill();
+  }
+}
+
+function dGround(){
+  // Suelo continuo — acera/calle de la ciudad
+  W.pl.forEach(p=>{
+    if(p.t!=='g')return;
+    const px=sx(p.x);if(px+p.w<0||px>NW)return;
+    ctx.fillStyle='#0c0a18';ctx.fillRect(px,p.y,p.w,6);
+    ctx.fillStyle='#10101e';ctx.fillRect(px,p.y+6,p.w,p.h-6);
+    // Baldosas
+    ctx.fillStyle='rgba(80,60,120,.12)';
+    for(let lx=px;lx<px+p.w;lx+=40) ctx.fillRect(lx,p.y,1,p.h);
+    for(let ly=0;ly<2;ly++) ctx.fillRect(px,p.y+p.h*.4+ly*p.h*.3,p.w,1);
+    // Charcos de lluvia
+    for(let cx2=px+30;cx2<px+p.w-25;cx2+=120){
+      ctx.fillStyle='rgba(60,50,100,.22)';
+      ctx.beginPath();ctx.ellipse(cx2,p.y+3,28,5,0,0,Math.PI*2);ctx.fill();
+    }
+  });
+}
+
+function dObjects(){
+  // Cajas
+  W.pl.filter(p=>p.t==='b').forEach(p=>{
+    const px=sx(p.x);if(px+p.w<-4||px>NW+4)return;
+    ctx.fillStyle='#2a1e10';ctx.fillRect(px,p.y,p.w,p.h);
+    ctx.fillStyle='#3a2818';ctx.fillRect(px,p.y,p.w,5);
+    ctx.fillRect(px,p.y,5,p.h);
+    ctx.fillStyle='#1e1408';ctx.fillRect(px+2,p.y+7,p.w-4,2);ctx.fillRect(px+p.w/2-1,p.y+7,2,p.h-9);
+    ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(px+2,p.y+2,7,4);
+  });
+  // Bancos
+  W.pl.filter(p=>p.t==='bench').forEach(p=>{
+    const px=sx(p.x);if(px+p.w<-4||px>NW+4)return;
+    // Respaldo
+    ctx.fillStyle='#1c1828';ctx.fillRect(px,p.y,p.w,5);
+    ctx.fillStyle='#242038';ctx.fillRect(px,p.y,p.w,2);
+    // Asiento
+    ctx.fillStyle='#1c1828';ctx.fillRect(px,p.y+9,p.w,5);
+    // Patas
+    ctx.fillStyle='#141224';ctx.fillRect(px+4,p.y+14,4,p.h-14);ctx.fillRect(px+p.w-8,p.y+14,4,p.h-14);
+  });
+  // Farolas
+  for(let lx=100;lx<WW;lx+=260){
+    const lpx=sx(lx);if(lpx<-30||lpx>NW+30)continue;
+    const lpy=GY-100;
+    ctx.fillStyle='#14122a';ctx.fillRect(lpx-2,lpy,5,GY-lpy);
+    ctx.fillRect(lpx-2,lpy,20,5);
+    const gl=ctx.createRadialGradient(lpx+18,lpy+5,0,lpx+18,lpy+5,50);
+    gl.addColorStop(0,'rgba(190,170,120,.18)');gl.addColorStop(1,'rgba(190,170,120,0)');
+    ctx.fillStyle=gl;ctx.beginPath();ctx.arc(lpx+18,lpy+5,50,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(210,190,130,.7)';ctx.beginPath();ctx.arc(lpx+18,lpy+5,4,0,Math.PI*2);ctx.fill();
+  }
+}
+
+function dRain(){
+  ctx.strokeStyle='rgba(80,70,120,.32)';ctx.lineWidth=.7;
+  RD.forEach(r=>{ctx.beginPath();ctx.moveTo(r.x,r.y);ctx.lineTo(r.x-2,r.y+r.l);ctx.stroke();});
+}
+
+function dFog(){
+  const fl=ctx.createLinearGradient(0,0,NW,0);
+  fl.addColorStop(0,'rgba(6,4,8,.65)');fl.addColorStop(.22,'rgba(6,4,8,0)');
+  fl.addColorStop(.78,'rgba(6,4,8,0)');fl.addColorStop(1,'rgba(6,4,8,.65)');
+  ctx.fillStyle=fl;ctx.fillRect(0,0,NW,NH);
+  // Niebla baja
+  const fb=ctx.createLinearGradient(0,GY-40,0,GY+8);
+  fb.addColorStop(0,'rgba(6,4,8,0)');fb.addColorStop(1,'rgba(6,4,8,.45)');
+  ctx.fillStyle=fb;ctx.fillRect(0,GY-40,NW,50);
+}
+
+function dEnemies(){
+  W.en.forEach(e=>{
+    const ex=sx(e.x);if(ex+e.w<-4||ex>NW+4)return;
+    const ey=e.y,lg=e.an%2===0;
+    ctx.save();
+    if(e.dr===-1){ctx.translate(ex+e.w,ey);ctx.scale(-1,1);}else ctx.translate(ex,ey);
+    // Figura sombría — transeúnte nocturno
+    ctx.fillStyle='#0e0e1e';ctx.fillRect(2,0,18,8);    // sombrero
+    ctx.fillStyle='#14142a';ctx.fillRect(1,7,20,16);   // cuerpo/abrigo
+    ctx.fillStyle='#c0a888';ctx.fillRect(5,1,12,7);    // cara
+    ctx.fillStyle=e.an%4<2?'#6050a0':'#302050';
+    ctx.fillRect(6,3,3,2);ctx.fillRect(13,3,3,2);
+    ctx.fillStyle='rgba(80,60,140,.15)';ctx.fillRect(1,7,20,16);
+    ctx.fillStyle='#0a0a18';ctx.fillRect(0,8,2,10);ctx.fillRect(20,8,2,10);
+    ctx.fillStyle='#080818';
+    ctx.fillRect(4,23,5,3+(lg?2:0));ctx.fillRect(13,23,5,3+(lg?0:2));
+    ctx.restore();
+    ctx.fillStyle='rgba(60,50,100,.15)';ctx.fillRect(ex,ey+e.h,e.w,4);
+  });
+}
+
+function dCoins(){
+  W.cn.forEach(c=>{
+    if(c.col)return;
+    const cx2=sx(c.x);if(cx2<-20||cx2>NW+20)return;
+    c.an+=.07;const sc=.87+Math.sin(c.an)*.13;
+    ctx.fillStyle='#f4c542';ctx.beginPath();ctx.ellipse(cx2,c.y,7*sc,7,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fffaaa';ctx.beginPath();ctx.ellipse(cx2-2,c.y-2,2.5*sc,2.5,0,0,Math.PI*2);ctx.fill();
+  });
+}
+
+function dParts(){
+  PA.forEach(p=>{ctx.globalAlpha=p.lf/p.mx;ctx.fillStyle=p.col;ctx.fillRect(Math.round(sx(p.x)),Math.round(p.y),Math.round(p.sz),Math.round(p.sz));});
+  ctx.globalAlpha=1;
+}
+
+function dMary(){
+  if(P.dead&&P.rt<60)return;
+  if(P.inv>0&&Math.floor(P.inv/5)%2===0)return;
+  const px=sx(P.x),py=P.y;
+  ctx.save();
+  if(P.dr===-1){ctx.translate(px+P.w,py);ctx.scale(-1,1);}else ctx.translate(px,py);
+  ctx.fillStyle='#3d1f00';ctx.fillRect(2,0,14,7);ctx.fillRect(0,4,3,8);
+  ctx.fillStyle='#f4c542';ctx.fillRect(3,4,13,9);
+  ctx.fillStyle='#3d1f00';ctx.fillRect(5,7,2,2);ctx.fillRect(11,7,2,2);
+  ctx.fillStyle='#c07050';ctx.fillRect(7,11,5,2);
+  ctx.fillStyle='#3a8fc4';ctx.fillRect(2,13,14,9);ctx.fillRect(0,14,3,6);ctx.fillRect(15,14,3,6);
+  ctx.fillStyle='rgba(70,50,120,.18)';ctx.fillRect(2,13,14,9);
+  ctx.fillStyle='#2c2c5e';
+  if(!P.og){ctx.fillRect(2,22,6,8);ctx.fillRect(10,22,6,8);}
+  else{const l=Math.floor(P.af/4)%2;ctx.fillRect(2,22,6,4+(l?4:0));ctx.fillRect(10,22,6,4+(l?0:4));}
+  ctx.fillStyle='#3d1f00';ctx.fillRect(1,24,7,4);ctx.fillRect(9,24,7,4);
+  ctx.restore();
+}
+
+/* ══════════════════════════════════════
+   LOOP
+══════════════════════════════════════ */
+function loop(){
+  ctx.clearRect(0,0,NW,NH);
+  if(gs==='title'){requestAnimationFrame(loop);return;}
+
+  if(gs==='playing'||gs==='escena_wait'){
+    tkEn();tickRain();tickTrain();
+    if(gs==='playing'){update();tickP();}
+  }
+  if(gs==='dialog'){tkEn();tickRain();tickTrain();tkD();tickP();}
+  if(gs==='escena'||gs==='carta'||gs==='credits'){tickRain();tickTrain();}
+
+  dSky();dBgCity();dStation();dGround();dObjects();
+  dTrain();dRain();dFog();
+  dEnemies();dCoins();dParts();dMary();
+
+  if(gs==='playing'||gs==='dialog'){
+    ctx.fillStyle='rgba(110,90,160,.8)';ctx.font='8px "Press Start 2P"';
+    ctx.fillText('▶ META: '+Math.max(0,Math.round((W.goal-P.x)/10)*10)+'m',8,16);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+/* ══════════════════════════════════════
+   INICIO
+══════════════════════════════════════ */
+document.getElementById('cw').addEventListener('click',()=>{
+  if(gs==='title')start();
+  if(gs==='dialog')advD();
+});
+document.getElementById('stBtn').addEventListener('click',start);
+
+function start(){
+  document.getElementById('ovT').style.display='none';
+  gs='playing';updH();
+  setTimeout(()=>{if(gs==='playing'){DL[0].sh=true;opD(DL[0].t);}},700);
+  requestAnimationFrame(loop);
+}
+
+// Animación título
+(function ta(ts){
+  if(gs!=='title')return;
+  ctx.clearRect(0,0,NW,NH);
+  const g=ctx.createLinearGradient(0,0,0,NH);
+  g.addColorStop(0,'#060408');g.addColorStop(1,'#0e0c18');
+  ctx.fillStyle=g;ctx.fillRect(0,0,NW,NH);
+  const t=ts/1000;
+  ctx.strokeStyle='rgba(70,60,110,.32)';ctx.lineWidth=.7;
+  for(let i=0;i<55;i++){
+    const rx=(i*31+t*95)%NW,ry=(i*23+t*180+i*60)%NH;
+    ctx.beginPath();ctx.moveTo(rx,ry);ctx.lineTo(rx-2,ry+11);ctx.stroke();
+  }
+  for(let i=0;i<6;i++){
+    const fx=120+i*110+Math.sin(t*.35+i)*18,fy=150+Math.sin(t*.28+i*.7)*28;
+    ctx.fillStyle=`rgba(110,90,160,${.12+Math.sin(t*.7+i)*.08})`;
+    ctx.beginPath();ctx.arc(fx,fy,3,0,Math.PI*2);ctx.fill();
+  }
+  requestAnimationFrame(ta);
+})(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mary – El Camino a Casa</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    width:100%;height:100%;
+    background:linear-gradient(180deg,#0a0518 0%,#1a0a2e 50%,#0a0518 100%);
+    font-family:'Press Start 2P',monospace;
+    overflow:hidden;touch-action:manipulation;
+    user-select:none;-webkit-user-select:none;
+    color:#fff;
+  }
+  #root{
+    width:100vw;height:100vh;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:20px 14px;
+    overflow-y:auto;
+  }
+  .title{
+    color:#f4c542;
+    font-size:clamp(18px,5vw,28px);
+    text-align:center;
+    text-shadow:4px 4px 0 #7a3f00;
+    margin-bottom:8px;
+    line-height:1.5;
+  }
+  .subtitle{
+    color:#c8a8e0;
+    font-size:clamp(7px,1.8vw,9px);
+    text-align:center;
+    margin-bottom:30px;
+    letter-spacing:2px;
+    line-height:1.8;
+  }
+  .levels{
+    display:flex;flex-direction:column;
+    gap:12px;width:100%;max-width:380px;
+  }
+  .lvl{
+    background:linear-gradient(135deg,rgba(244,197,66,.08) 0%,rgba(244,197,66,.02) 100%);
+    border:2px solid rgba(244,197,66,.4);
+    color:#f4c542;
+    padding:14px 18px;
+    font-family:'Press Start 2P',monospace;
+    font-size:9px;
+    cursor:pointer;
+    border-radius:8px;
+    transition:all .15s;
+    display:flex;align-items:center;gap:14px;
+    text-align:left;
+    position:relative;
+    overflow:hidden;
+  }
+  .lvl::before{
+    content:'';position:absolute;top:0;left:-100%;
+    width:100%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(244,197,66,.15),transparent);
+    transition:left .5s;
+  }
+  .lvl:active::before{left:100%;}
+  .lvl:active{
+    background:rgba(244,197,66,.25);
+    transform:scale(.98);
+  }
+  .lvl-num{
+    background:#f4c542;
+    color:#1a0a2e;
+    width:36px;height:36px;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:6px;
+    font-size:14px;
+    flex-shrink:0;
+  }
+  .lvl-info{flex:1;}
+  .lvl-name{
+    color:#fff;
+    font-size:9px;
+    margin-bottom:5px;
+    line-height:1.3;
+  }
+  .lvl-desc{
+    color:#a890c8;
+    font-size:6px;
+    line-height:1.6;
+  }
+  .lvl-arrow{
+    color:#f4c542;
+    font-size:14px;
+  }
+  
+  .menu-btn{
+    background:linear-gradient(135deg,rgba(244,197,66,.08) 0%,rgba(244,197,66,.02) 100%);
+    border:2px solid rgba(244,197,66,.4);
+    color:#f4c542;
+    padding:14px 18px;
+    font-family:'Press Start 2P',monospace;
+    font-size:9px;
+    cursor:pointer;
+    border-radius:8px;
+    transition:all .15s;
+    text-align:center;
+  }
+  .menu-btn:active{
+    background:rgba(244,197,66,.25);
+    transform:scale(.98);
+  }
+
+  /* Tema diferente por nivel */
+  .lvl[data-theme="barrio"] { border-color:rgba(255,160,80,.5); }
+  .lvl[data-theme="barrio"] .lvl-num { background:#ff9d4a; }
+  .lvl[data-theme="bosque"] { border-color:rgba(120,200,80,.5); }
+  .lvl[data-theme="bosque"] .lvl-num { background:#7eff4a; color:#0a1a0a; }
+  .lvl[data-theme="fabrica"] { border-color:rgba(244,120,30,.5); }
+  .lvl[data-theme="fabrica"] .lvl-num { background:#f4a030; color:#0f0a06; }
+  .lvl[data-theme="ciudad"] { border-color:rgba(80,140,200,.5); }
+  .lvl[data-theme="ciudad"] .lvl-num { background:#5080b0; }
+  .lvl[data-theme="estacion"] { border-color:rgba(150,120,200,.5); }
+  .lvl[data-theme="estacion"] .lvl-num { background:#9080c0; }
+
+  .footer{
+    margin-top:30px;
+    color:#5a4878;
+    font-size:6px;
+    text-align:center;
+    line-height:2;
+  }
+
+  /* Animación lluvia decorativa */
+  .rain{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-1;opacity:.3;}
+</style>
+</head>
+<body>
+<canvas class="rain" id="rainCanvas"></canvas>
+
+<div id="root">
+  <div class="title">MARY</div>
+  <div class="subtitle">EL CAMINO A CASA</div>
+
+  <div class="levels">
+    <div class="lvl" data-theme="barrio" data-level="1">
+      <div class="lvl-num">1</div>
+      <div class="lvl-info">
+        <div class="lvl-name">EL BARRIO</div>
+        <div class="lvl-desc">"Papá decía que correr me haría fuerte…"</div>
+      </div>
+      <div class="lvl-arrow">▶</div>
+    </div>
+
+    <div class="lvl" data-theme="bosque" data-level="2">
+      <div class="lvl-num">2</div>
+      <div class="lvl-info">
+        <div class="lvl-name">EL BOSQUE</div>
+        <div class="lvl-desc">"Una vez fuimos a juntar flores…"</div>
+      </div>
+      <div class="lvl-arrow">▶</div>
+    </div>
+
+    <div class="lvl" data-theme="fabrica" data-level="3">
+      <div class="lvl-num">3</div>
+      <div class="lvl-info">
+        <div class="lvl-name">VIEJA FÁBRICA</div>
+        <div class="lvl-desc">"Papá prometió que volvería…"</div>
+      </div>
+      <div class="lvl-arrow">▶</div>
+    </div>
+
+    <div class="lvl" data-theme="ciudad" data-level="4">
+      <div class="lvl-num">4</div>
+      <div class="lvl-info">
+        <div class="lvl-name">CIUDAD BAJO LLUVIA</div>
+        <div class="lvl-desc">"Mamá ya no hablaba de él…"</div>
+      </div>
+      <div class="lvl-arrow">▶</div>
+    </div>
+
+    <div class="lvl" data-theme="estacion" data-level="5">
+      <div class="lvl-num">5</div>
+      <div class="lvl-info">
+        <div class="lvl-name">LA ESTACIÓN — FINAL</div>
+        <div class="lvl-desc">"Mary llega cansada. Hay silencio."</div>
+      </div>
+      <div class="lvl-arrow">★</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    UN JUEGO DE PIXEL ART<br>
+    INSPIRADO EN UNA HISTORIA DE GUERRA<br><br>
+    ✦ TOCA UN NIVEL PARA JUGAR ✦
+  </div>
+  
+  <div class="menu-btn" style="margin-top:20px;max-width:200px;font-size:7px;padding:10px;" onclick="location.href='menu.html'">
+    ◀ MENÚ PRINCIPAL
+  </div>
+</div>
+
+<script>
+// Navegación a niveles
+document.querySelectorAll('.lvl').forEach(el=>{
+  el.addEventListener('click',()=>{
+    const lvl=el.getAttribute('data-level');
+    window.location.href='levels/nivel'+lvl+'.html';
+  });
+});
+
+// Lluvia decorativa de fondo
+const rc=document.getElementById('rainCanvas');
+const rctx=rc.getContext('2d');
+function rzr(){rc.width=window.innerWidth;rc.height=window.innerHeight;}
+rzr();window.addEventListener('resize',rzr);
+const drops=[];
+for(let i=0;i<80;i++) drops.push({x:Math.random()*rc.width,y:Math.random()*rc.height,l:5+Math.random()*8,s:5+Math.random()*5});
+function rainLoop(){
+  rctx.clearRect(0,0,rc.width,rc.height);
+  rctx.strokeStyle='rgba(150,120,200,.4)';rctx.lineWidth=1;
+  drops.forEach(d=>{
+    rctx.beginPath();rctx.moveTo(d.x,d.y);rctx.lineTo(d.x-2,d.y+d.l);rctx.stroke();
+    d.y+=d.s;d.x-=.8;
+    if(d.y>rc.height){d.y=-d.l;d.x=Math.random()*rc.width;}
+    if(d.x<-5)d.x=rc.width+5;
+  });
+  requestAnimationFrame(rainLoop);
+}
+rainLoop();
+</script>
+</body>
+</html>

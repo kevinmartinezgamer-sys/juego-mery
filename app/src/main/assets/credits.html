@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mary – Créditos</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    width:100%;height:100%;
+    background:linear-gradient(180deg,#0a0518 0%,#1a0a2e 50%,#0a0518 100%);
+    font-family:'Press Start 2P',monospace;
+    overflow:hidden;touch-action:manipulation;
+    user-select:none;-webkit-user-select:none;
+    color:#fff;
+  }
+  #root{
+    width:100vw;height:100vh;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:flex-start;
+    padding:20px 14px;
+    overflow-y:auto;
+  }
+  .title{
+    color:#f4c542;
+    font-size:clamp(16px,4vw,22px);
+    text-align:center;
+    text-shadow:3px 3px 0 #7a3f00;
+    margin-bottom:20px;
+  }
+  .credits-section{
+    width:100%;max-width:400px;
+    background:rgba(244,197,66,.05);
+    border:2px solid rgba(244,197,66,.3);
+    border-radius:8px;
+    padding:14px;
+    margin:8px 0;
+    text-align:center;
+  }
+  .section-title{
+    color:#f4c542;
+    font-size:9px;
+    margin-bottom:10px;
+  }
+  .section-content{
+    color:#c8a8e0;
+    font-size:7px;
+    line-height:2;
+  }
+  .back-btn{
+    background:rgba(255,100,100,.1);
+    border:2px solid rgba(255,100,100,.5);
+    color:#ff6464;
+    padding:12px 20px;
+    font-family:'Press Start 2P',monospace;
+    font-size:8px;
+    cursor:pointer;
+    border-radius:8px;
+    margin-top:20px;
+  }
+  .back-btn:active{
+    background:rgba(255,100,100,.3);
+  }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="title">★ CRÉDITOS</div>
+
+  <div class="credits-section">
+    <div class="section-title">DESARROLLO</div>
+    <div class="section-content">
+      DISEÑO Y PROGRAMACIÓN<br>
+      EQUIPO MARY GAME
+    </div>
+  </div>
+
+  <div class="credits-section">
+    <div class="section-title">ARTE Y MÚSICA</div>
+    <div class="section-content">
+      PIXEL ART<br>
+      DISEÑO DE NIVELES<br>
+      COMPOSICIÓN MUSICAL
+    </div>
+  </div>
+
+  <div class="credits-section">
+    <div class="section-title">HISTORIA</div>
+    <div class="section-content">
+      INSPIRADO EN HISTORIAS<br>
+      DE GUERRA Y ESPERANZA<br><br>
+      "El camino a casa<br>
+      siempre es el más largo"
+    </div>
+  </div>
+
+  <div class="credits-section">
+    <div class="section-title">AGRADECIMIENTOS</div>
+    <div class="section-content">
+      A TODOS LOS QUE CREYERON<br>
+      EN ESTE PROYECTO<br><br>
+      GRACIAS POR JUGAR
+    </div>
+  </div>
+
+  <div class="back-btn" onclick="goBack()">◀ VOLVER</div>
+</div>
+
+<script>
+function goBack() {
+  window.history.back();
+}
+</script>
+</body>
+</html>
